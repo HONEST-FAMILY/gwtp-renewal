@@ -192,7 +192,7 @@
 
       '<section class="sec gray" id="fields"><div class="wrap">' +
         '<div class="split rise"><div class="ph"><img src="assets/img/wj-openlab.jpg" alt="원주 강원혁신지원 OpenLAB센터" loading="lazy"><span class="cap">원주 강원혁신지원 OpenLAB센터</span></div>' +
-        '<div class="pn"><h2 class="anim-up"><span class="line-mask"><span>강원 산업을 키우는</span></span><span class="line-mask"><span>일곱 개 분야</span></span></h2><p>분야를 누르면 그 분야 공고만 모아 보여 드립니다.</p>' +
+        '<div class="pn"><h2 class="anim-up"><span class="line-mask"><span>공고를 분야별로</span></span><span class="line-mask"><span>모아 봅니다</span></span></h2><p>공고를 일곱 갈래로 나눴습니다. 분야를 누르면 그 분야 공고만 보여 드립니다.</p>' +
           '<div class="sector-list">' + B.sectors.map(function (s) {
             return '<button type="button" data-sector="' + s + '"><span><b>' + s + '</b><small>' + (secDesc[s] || '') + '</small></span><span class="cnt' + (secCount[s] ? '' : ' zero') + '">' + (secCount[s] ? '모집중 ' + secCount[s] + '건' : '다음 공고 예정') + '</span><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4l6 6-6 6" fill="none" stroke="#002049" stroke-width="2"/></svg></button>';
           }).join('') + '</div></div></div>' +
@@ -222,6 +222,14 @@
     watch(app);
   }
   function sysLink(s) { return '<a href="' + s.url + '" target="_blank" rel="noopener"><span>' + s.group + '</span><b>' + s.name + '</b></a>'; }
+  function cityShape(city) {
+    var ar = areaBy(city); if (!ar) return '';
+    var n = ar.d.match(/-?\d+(\.\d+)?/g).map(Number), xs = [], ys = [];
+    for (var i = 0; i + 1 < n.length; i += 2) { xs.push(n[i]); ys.push(n[i + 1]); }
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var pad = Math.max(x1 - x0, y1 - y0) * 0.18;
+    return '<svg viewBox="' + (x0 - pad) + ' ' + (y0 - pad) + ' ' + (x1 - x0 + pad * 2) + ' ' + (y1 - y0 + pad * 2) + '" role="img" aria-label="' + city + ' 위치"><path d="' + ar.d + '" fill="#fff" stroke="#002049" stroke-width="1.5" vector-effect="non-scaling-stroke"/><circle cx="' + ar.cx + '" cy="' + ar.cy + '" r="' + (Math.max(x1 - x0, y1 - y0) * 0.05) + '" fill="#1d4bff"/></svg>';
+  }
   function showCity(city) {
     $$('#cityTabs button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.city === city)); });
     $$('.gwmap .area').forEach(function (p) { p.classList.toggle('on', p.dataset.city === city); });
@@ -230,8 +238,8 @@
     var box = $('#placeBox');
     box.innerHTML = '<h3>' + city + '</h3><p class="sub">거점 ' + placeCities[city].length + '곳</p><div class="place-cards">' + placeCities[city].map(function (p) {
       var r = recruit[p.name];
-      return '<div class="pcard rise">' + (p.img ? '<div class="im"><img src="assets/img/' + p.img + '.jpg" alt="' + esc(p.name) + '" loading="lazy"></div>' : '<div class="im none">사진 준비 전</div>') +
-        '<div><h4>' + esc(p.name) + '</h4><p>' + esc(p.addr) + '<br>' + esc(p.area) + ' · ' + esc(p.scale) + '<br>' + esc(p.use) + '</p>' +
+      return '<div class="pcard rise">' + (p.img ? '<div class="im"><img src="assets/img/' + p.img + '.jpg" alt="' + esc(p.name) + '" loading="lazy"></div>' : '<div class="im none">' + cityShape(p.city) + '</div>') +
+        '<div><h4>' + esc(p.name) + '</h4><p>' + esc(p.addr) + '<br>' + esc(p.area) + (p.scale ? ' · ' + esc(p.scale) : '') + '<br>' + esc(p.use) + '</p>' +
         (r ? '<a class="recruit" href="#/notice/' + r.idx + '">입주기업 모집중 →</a>' : '') + '</div></div>';
     }).join('') + '</div>';
     $$('.rise', box).forEach(function (el, i) { if (reduce) { el.classList.add('in'); return; } setTimeout(function () { el.classList.add('in'); }, 60 * i); });
