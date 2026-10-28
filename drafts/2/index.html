@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>강원테크노파크 — 지금 신청할 수 있는 지원 찾기</title>
+<meta name="description" content="강원테크노파크 모집공고를 분야·지역·필요한 도움으로 찾고, 공고마다 한 장 요약으로 확인합니다.">
+<link rel="icon" href="../assets-shared/img/favicon.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fastly.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script>document.documentElement.className += ' js';setTimeout(function(){document.documentElement.classList.add('safe')},900);</script>
+</head>
+<body>
+<a class="skip" href="#view">본문 바로가기</a>
+
+<header class="hd" id="hd">
+  <div class="hd-in">
+    <a class="logo" href="#/" aria-label="강원테크노파크 처음 화면"><img src="../assets-shared/img/logo-navy.png" alt="재단법인 강원테크노파크" width="300" height="72"></a>
+    <nav class="gnb" aria-label="주 메뉴">
+      <ul id="gnb"></ul>
+    </nav>
+    <div class="hd-tools">
+      <a class="tool" href="#/notices"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M9 3.5v2h6v-2M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg></span><span class="tl">전체 공고</span></a>
+      <a class="tool" href="https://www.gwtp.or.kr/gwtp/bbsNew_list.php?code=sub06b&amp;keyvalue=sub06" target="_blank" rel="noopener"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="4" width="15" height="16" rx="1.5"/><path d="M8 8h8M8 11.5h8M8 15h5"/></svg></span><span class="tl">보도자료</span></a>
+      <button class="tool" type="button" id="toolSearch"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></span><span class="tl">검색</span></button>
+      <button class="tool tool-menu" type="button" id="menuBtn" aria-expanded="false" aria-controls="drawer"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7.5h14M5 12h14M5 16.5h14"/></svg></span><span class="tl">메뉴</span></button>
+    </div>
+  </div>
+  <div class="mega" id="mega" hidden><div class="mega-in" id="megaIn"></div></div>
+</header>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-hd">
+    <img src="../assets-shared/img/logo-navy.png" alt="재단법인 강원테크노파크" width="150" height="36">
+    <button class="ring-btn" type="button" id="drawerClose" aria-label="메뉴 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<main id="view">
+  <div id="home">
+    <section class="hero">
+      <div class="hero-art" id="heroArt" aria-hidden="true"></div>
+      <div class="wrap hero-in">
+        <h1 class="hero-h"><span class="ln a"><span>강원 기업의</span></span><span class="ln b"><span>다음 단계를</span></span><span class="ln c"><span>함께 찾습니다</span></span></h1>
+        <form class="sbox" id="heroSearch" role="search" action="#/search">
+          <label class="sr" for="heroQ">무엇을 찾으세요?</label>
+          <input id="heroQ" name="q" type="search" autocomplete="off" placeholder="무엇을 찾으세요? (예: 장비, 입주, 수소, 교육)">
+          <button type="submit" aria-label="찾기"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3l5 5"/></svg></button>
+        </form>
+      </div>
+    </section>
+
+    <section class="types" aria-labelledby="typesH">
+      <div class="wrap sec-hd">
+        <h2 id="typesH" class="h2">분야를 고르면 지금 모집 중인 공고만 보여 드립니다</h2>
+        <div class="arrows"><button class="ring-btn" type="button" data-scroll="typeRow" data-dir="-1" aria-label="이전 분야"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button><button class="ring-btn" type="button" data-scroll="typeRow" data-dir="1" aria-label="다음 분야"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+      </div>
+      <div class="row" id="typeRow"></div>
+    </section>
+
+    <section class="band" aria-labelledby="bandH">
+      <div class="wrap sec-hd">
+        <h2 id="bandH" class="h2">마감이 가까운 공고부터 보세요</h2>
+        <a class="band-all" href="#/notices"><span>지금 신청 가능 <b id="liveCount">12</b>건 모두 보기</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="row" id="bandRow"></div>
+    </section>
+
+    <section class="light" aria-labelledby="lightH">
+      <div class="wrap light-in">
+        <div class="light-txt">
+          <h2 id="lightH" class="h2 navy">입주할 공간을 찾고 있나요?</h2>
+          <p id="lightP">춘천·강릉·원주·삼척·태백·홍천에 있는 강원TP 시설 15곳의 주소와 면적, 쓰임을 한곳에서 봅니다.</p>
+          <a class="pill" href="#/search?q=%EC%9E%85%EC%A3%BC">입주 공고와 시설 보기<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <figure class="light-fig"><img src="../assets-shared/img/cc-hq.jpg" alt="춘천 신북읍 강원테크노파크 기술혁신지원센터와 벤처공장 전경" width="1200" height="496" loading="lazy"></figure>
+      </div>
+    </section>
+
+    <section class="news" aria-labelledby="newsH">
+      <div class="wrap">
+        <div class="sec-hd flat"><h2 id="newsH" class="h2">강원TP 소식</h2><a class="more" href="https://www.gwtp.or.kr/gwtp/bbsNew_list.php?code=sub06b&amp;keyvalue=sub06" target="_blank" rel="noopener">보도자료 전체</a></div>
+        <ul class="news-list" id="newsList"></ul>
+      </div>
+    </section>
+
+    <section class="sys" aria-labelledby="sysH">
+      <div class="wrap">
+        <div class="sec-hd flat"><h2 id="sysH" class="h2">자주 쓰는 강원TP 서비스</h2></div>
+        <ul class="sys-list" id="sysList"></ul>
+      </div>
+    </section>
+  </div>
+  <div id="page" hidden></div>
+</main>
+
+<footer class="ft">
+  <div class="wrap ft-in">
+    <img src="../assets-shared/img/logo-white.png" alt="재단법인 강원테크노파크" width="180" height="43">
+    <div class="ft-txt">
+      <p id="ftAddr">(24206) 강원특별자치도 춘천시 신북읍 신북로 61-10 강원테크노파크 기술혁신지원센터</p>
+      <p>대표전화 <a href="tel:033-248-5600">033-248-5600</a></p>
+    </div>
+    <ul class="ft-links">
+      <li><a href="https://www.gwtp.or.kr/gwtp/pageview.php?url=sub07g&amp;keyvalue=sub07" target="_blank" rel="noopener">찾아오시는 길</a></li>
+      <li><a href="https://www.gwtp.or.kr/gwtp/pageview.php?url=sub07f&amp;keyvalue=sub07#menu3" target="_blank" rel="noopener">클린신고센터</a></li>
+      <li><a href="https://www.gwtp.or.kr/gwtp/pageview.php?url=sub06h&amp;keyvalue=sub06" target="_blank" rel="noopener">뉴스레터 신청</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../assets-shared/gw-map.js"></script>
+<script src="../assets-shared/base.js"></script>
+<script src="../assets-shared/notices.js"></script>
+<script src="../assets-shared/gw-core.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
