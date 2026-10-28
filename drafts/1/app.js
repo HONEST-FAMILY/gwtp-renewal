@@ -291,6 +291,7 @@
   if (window.HeroMap && window.GW_TOPO) {
     HeroMap.roll($('#liveN'), String(liveN).replace(/./g, '0'));
     $('.live-n').classList.add('is-ready');
+    setTimeout(function () { HeroMap.roll($('#liveN'), String(liveN)); }, 450);
     HeroMap.init({ hero: hero, form: form, box: $('#topo'), tag: $('#tag'), lead: $('#lead') }).then(function () {
       mapReady = true; liveShown = true; updateLive();
       if (form.elements.r.value) HeroMap.pick(form.elements.r.value);
