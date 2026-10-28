@@ -381,7 +381,9 @@
       ], { duration: 460, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
       anim.onfinish = function () {
         box.style.visibility = '';
-        ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' }).onfinish = function () { ghost.remove(); };
+        var head = $('.f-head', box).offsetHeight || 64;
+        var cut = Math.max(0, 100 - head / b.height * 100);
+        ghost.animate([{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 ' + cut + '% 0)' }], { duration: 420, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }).onfinish = function () { setTimeout(function () { ghost.remove(); }, 400); };
         introQ();
       };
     } else { introQ(); }
