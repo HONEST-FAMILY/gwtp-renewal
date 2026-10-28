@@ -42,15 +42,22 @@
 <main id="view">
   <div id="home">
     <section class="hero">
-      <div class="hero-art" id="heroArt" aria-hidden="true"></div>
       <div class="wrap hero-in">
-        <h1 class="hero-h"><span class="ln a"><span>강원 기업의</span></span><span class="ln b"><span>다음 단계를</span></span><span class="ln c"><span>함께 찾습니다</span></span></h1>
+        <div class="hero-top">
+          <h1 class="hero-h" id="rollH"><span class="ln a"><span>강원에서</span></span><span class="ln b"><span><button class="roll" id="rollBtn" type="button" aria-label="‘장비’ 검색 결과 보기"><span class="slot" id="rollWord"><span class="cur">장비</span></span></button><span class="slot josa" id="rollJosa"><span class="cur">를</span></span></span></span><span class="ln c"><span>찾는 기업에게</span></span></h1>
+          <a class="rstat" id="rollStat" href="#/search?q=%EC%9E%A5%EB%B9%84"><span class="rs-l">지금 신청 가능</span><span class="rs-n"><span class="slot" id="rollNum"><span class="cur">&nbsp;</span></span><span class="gun">건</span></span><span class="rs-w"><span>‘<span id="rollWord2">장비</span>’ 공고 보기</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        </div>
         <form class="sbox" id="heroSearch" role="search" action="#/search">
           <label class="sr" for="heroQ">무엇을 찾으세요?</label>
           <input id="heroQ" name="q" type="search" autocomplete="off" placeholder="무엇을 찾으세요? (예: 장비, 입주, 수소, 교육)">
           <button type="submit" aria-label="찾기"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3l5 5"/></svg></button>
         </form>
       </div>
+    </section>
+
+    <section class="scene" id="scene" aria-labelledby="sceneH">
+      <h2 class="sr" id="sceneH">모집공고 게시판 글이 지금 신청할 수 있는 공고로 줄어드는 과정</h2>
+      <div class="stage" id="stage"><div class="wrap stage-in"><div class="cap" id="cap" aria-live="polite"></div><div class="field" id="field"></div></div></div>
     </section>
 
     <section class="types" aria-labelledby="typesH">

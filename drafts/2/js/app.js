@@ -128,7 +128,6 @@
 
   /* ---------- 처음 화면 ---------- */
   function buildHome() {
-    $('#heroArt').innerHTML = G.mapSvg({ areaClass: 'ma' });
     var counts = G.sectorCounts();
     $('#typeRow').innerHTML = B.sectors.map(function (s) {
       var im = SECTOR_IMG[s] || ['../assets-shared/img/cc-hq.jpg', '', '50% 50%'];
@@ -169,8 +168,6 @@
       });
     });
     wireSearch($('#heroSearch'));
-    fitPlaceholder($('#heroQ'));
-    window.addEventListener('resize', function () { fitPlaceholder($('#heroQ')); });
     countIn($('#home'));
   }
   function fitPlaceholder(inp) {
@@ -203,7 +200,7 @@
     if (location.hash && location.hash.indexOf('#/') !== 0) return;
     var r = parse();
     var changed = r.path !== lastPath; lastPath = r.path;
-    if (r.path === '/' || r.path === '') { show('home'); setNav(-1); document.title = '강원테크노파크 — 지금 신청할 수 있는 지원 찾기'; }
+    if (r.path === '/' || r.path === '') { show('home'); setNav(-1); document.title = '강원테크노파크 — 지금 신청할 수 있는 지원 찾기'; if (window.__sceneLayout) setTimeout(window.__sceneLayout, 0); }
     else if (r.path === '/search') { show('page'); setNav(-1); renderSearch(r.params.get('q') || ''); }
     else if (r.path === '/notices') { show('page'); setNav(0); renderList(r.params); }
     else if (/^\/notice\/\d+$/.test(r.path)) { show('page'); setNav(0); renderDetail(r.path.split('/')[2]); }
@@ -454,8 +451,217 @@
     $('#shareBtn').addEventListener('click', function () { G.share((n.short || n.title) + ' — 강원테크노파크', location.href, toast); });
   }
 
+  /* ---------- 킥 1: 제목 속 굴러가는 단어 ---------- */
+  var WORDS = ['장비', '입주 공간', '수소', '교육', '투자', '테스트'];
+  function josa(w) { var c = w.charCodeAt(w.length - 1); if (c < 0xAC00 || c > 0xD7A3) return '를'; return ((c - 0xAC00) % 28) ? '을' : '를'; }
+  function liveHits(w) { return G.search(w).notices.filter(function (n) { return G.status(n) !== 'closed'; }).length; }
+  function textW(slot, text) {
+    var m = document.createElement('span'); m.className = 'cur'; m.textContent = text;
+    m.style.cssText = 'position:absolute;visibility:hidden;left:0;top:0';
+    slot.appendChild(m); var w = m.getBoundingClientRect().width; m.remove(); return Math.ceil(w) + 1;
+  }
+  function slotTo(slot, text, anim) {
+    var cur = slot.querySelector('.cur:not(.out)');
+    var w = textW(slot, text);
+    if (!cur) { cur = document.createElement('span'); cur.className = 'cur'; slot.appendChild(cur); }
+    if (cur.textContent === text) { slot.style.width = w + 'px'; return; }
+    if (!anim || RM || !cur.animate) { cur.textContent = text; slot.style.width = w + 'px'; return; }
+    var nx = document.createElement('span'); nx.className = 'cur nxt'; nx.textContent = text; slot.appendChild(nx);
+    cur.classList.add('out');
+    var o = { duration: 560, easing: 'cubic-bezier(.2,.75,.2,1)' };
+    cur.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-105%)' }], o).onfinish = function () { cur.remove(); };
+    nx.animate([{ transform: 'translateY(105%)' }, { transform: 'translateY(0)' }], o).onfinish = function () { nx.classList.remove('nxt'); };
+    slot.style.width = w + 'px';
+  }
+  function initRoll() {
+    var H = $('#rollH'); if (!H) return;
+    var sW = $('#rollWord'), sJ = $('#rollJosa'), sN = $('#rollNum'), w2 = $('#rollWord2'), st = $('#rollStat'), q = $('#heroQ'), btn = $('#rollBtn');
+    var counts = WORDS.map(liveHits);
+    var i = 0, hover = false, inView = true;
+    function apply(anim) {
+      var w = WORDS[i];
+      slotTo(sW, w, anim); slotTo(sJ, josa(w), anim); slotTo(sN, String(counts[i]), anim);
+      w2.textContent = w; st.href = '#/search?q=' + encodeURIComponent(w);
+      st.setAttribute('aria-label', '‘' + w + '’ 지금 신청 가능 ' + counts[i] + '건 보기');
+      btn.setAttribute('aria-label', '‘' + w + '’ 검색 결과 보기');
+      if (q && !q.value) q.placeholder = '무엇을 찾으세요? (예: ' + w + ')';
+    }
+    function fit() {
+      [sW, sJ, sN].forEach(function (s) { var c = s.querySelector('.cur:not(.out)'); if (c) s.style.width = textW(s, c.textContent) + 'px'; });
+      H.style.minWidth = '';
+      if (window.innerWidth < 600) return;
+      var a = $('.ln.a', H), mx = 0;
+      WORDS.forEach(function (w) { mx = Math.max(mx, textW(sW, w) + textW(sJ, josa(w))); });
+      var tw = a.getBoundingClientRect().width + (parseFloat(getComputedStyle(a).marginRight) || 0) + mx + 4;
+      H.style.minWidth = Math.min(H.parentElement.clientWidth, Math.ceil(tw)) + 'px';
+    }
+    apply(false); fit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    window.addEventListener('resize', fit);
+    btn.addEventListener('click', function () { location.hash = '#/search?q=' + encodeURIComponent(WORDS[i]); });
+    function paused() { return hover || (q && (document.activeElement === q || q.value)) || !inView || document.hidden || !isHome(); }
+    [H, st].forEach(function (el) { el.addEventListener('mouseenter', function () { hover = true; }); el.addEventListener('mouseleave', function () { hover = false; }); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { inView = es[0].isIntersecting; }).observe($('.hero'));
+    window.__roll = { words: WORDS, counts: counts, index: function () { return i; } };
+    if (!RM) setInterval(function () { if (paused()) return; i = (i + 1) % WORDS.length; apply(true); }, 2200);
+  }
+
+  /* ---------- 킥 2: 게시판 칸이 지금 신청할 공고 카드가 되는 장면 ---------- */
+  function boardMax() {
+    var mx = 0;
+    G.all.forEach(function (n) {
+      var b = (n.url || '').split('bbs_data=')[1]; if (!b) return;
+      try { var m = atob(b.split('||')[0]).match(/listNo=(\d+)/); if (m) mx = Math.max(mx, +m[1]); } catch (e) { }
+    });
+    return mx;
+  }
+  var SC = null;
+  function sceneData() {
+    if (SC) return SC;
+    var pinned = G.detailed();
+    var ex = { r: '춘천시', s: '모빌리티' };
+    SC = { maxNo: boardMax(), pinned: pinned, ex: ex, hit: G.find(ex).hit, liveN: G.live().length, closedN: pinned.filter(function (n) { return G.status(n) === 'closed'; }).length };
+    return SC;
+  }
+  function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function mixA(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)]; }
+  function rgb(a) { return 'rgb(' + Math.round(a[0]) + ',' + Math.round(a[1]) + ',' + Math.round(a[2]) + ')'; }
+  var C_DARK = [47, 62, 80], C_BLUE = [0, 104, 176], C_GRAY = [201, 211, 221], C_PALE = [214, 227, 239];
+  function capHTML(k) {
+    var d = sceneData();
+    var go = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    if (k === 0) return '<p class="lbl">1 / 4 · 강원TP 모집공고 게시판</p><h3 class="ttl"><span class="ln"><span>모집공고 게시판,</span></span><span class="ln"><span>번호 <b>' + d.maxNo + '</b>번까지 쌓인 글</span></span></h3><p class="sub">회색 칸 하나가 글 번호 하나입니다. 맨 위 진한 줄은 게시판 꼭대기에 고정된 공지 ' + d.pinned.length + '칸.</p>';
+    if (k === 1) return '<p class="lbl">2 / 4 · 맨 위 고정 공지</p><h3 class="ttl"><span class="ln"><span>그중 지금 맨 위에 올라와 있는</span></span><span class="ln"><span>공고 <b>' + d.pinned.length + '</b>건</span></span></h3><p class="sub">나머지 글은 지난 공고라 옅게 물러납니다.</p>';
+    if (k === 2) return '<p class="lbl">3 / 4 · 마감일 확인</p><h3 class="ttl"><span class="ln"><span>마감일을 확인하면,</span></span><span class="ln"><span>지금 신청할 수 있는 건 <b>' + d.liveN + '</b>건</span></span></h3><p class="sub">오늘 날짜로 계산해 마감된 ' + d.closedN + '건은 회색이 됩니다.</p>';
+    return '<p class="lbl">4 / 4 · 내 회사 조건</p><h3 class="ttl"><span class="ln"><span>회사 위치·분야를 고르면</span></span><span class="ln"><span><b>' + d.hit.length + '</b>건</span></span></h3><div class="chips"><span class="chip">' + esc(d.ex.r) + '</span><span class="chip">' + esc(d.ex.s) + '</span></div><p class="sub">분야 제한이 없는 공고까지 함께 남습니다. 카드를 누르면 한 장 요약.</p><a class="go" href="#/notices?r=' + encodeURIComponent(d.ex.r) + '&s=' + encodeURIComponent(d.ex.s) + '">내 조건으로 거르기' + go + '</a>';
+  }
+  function cardHTML(n) {
+    var b = G.badge(n), st = G.status(n);
+    var sub = n.amount || (st === 'open' ? shortDue(n) : '');
+    if (n.amount && sub.length > 18 && sub.indexOf('·') > 0) sub = sub.split('·')[0] + ' 등';
+    return '<span class="pc"><span class="pt"><b class="dd">' + esc(b.text) + '</b>' + (sub ? '<span class="am">' + esc(sub) + '</span>' : '') + '</span><span class="nm">' + esc(n.short || n.title) + '</span></span>';
+  }
+  function Stage(root) {
+    var d = sceneData();
+    var field = $('.field', root), cap = $('.cap', root);
+    var N = d.maxNo;
+    var bg = document.createElement('div'); bg.className = 'bg';
+    var h = ''; for (var i = 0; i < N; i++) h += '<i style="--d:' + (60 + Math.round(i * 1.25)) + '"></i>';
+    bg.innerHTML = h; field.appendChild(bg);
+    var cells = bg.children;
+    var pins = d.pinned.map(function (n, j) {
+      var a = document.createElement('a'); a.className = 'p'; a.href = '#/notice/' + n.idx; a.tabIndex = -1; a.setAttribute('aria-hidden', 'true');
+      a.style.setProperty('--d', String(j * 12));
+      var pd = String(j * 12);
+      var hi = d.hit.indexOf(n);
+      if (hi > -1) { a.className = 'p hit'; a.innerHTML = cardHTML(n); a.setAttribute('aria-label', (n.short || n.title) + ' 한 장 요약'); }
+      field.appendChild(a);
+      return { n: n, el: a, closed: G.status(n) === 'closed', hit: hi, shown: false, d: pd };
+    });
+    var k = -1, last = 0;
+    function capFit() {
+      cap.style.minHeight = '';
+      if (window.innerWidth >= 1100) return;
+      var mh = 0;
+      for (var q = 0; q < 4; q++) { cap.innerHTML = capHTML(q); mh = Math.max(mh, cap.offsetHeight); }
+      cap.style.minHeight = mh + 'px';
+      cap.innerHTML = capHTML(k < 0 ? 0 : k);
+    }
+    function layout() {
+      capFit();
+      var W = field.clientWidth, H = field.clientHeight; if (!W || !H) return false;
+      var best = null;
+      for (var cols = 15; cols <= 72; cols++) {
+        var rows = Math.ceil(N / cols), pitch = Math.min(W / cols, H / (rows + 1.9));
+        if (!best || pitch > best.pitch) best = { cols: cols, rows: rows, pitch: pitch };
+      }
+      var pt = Math.min(best.pitch, 34), s = Math.max(2, pt * .8);
+      var gw = best.cols * pt - (pt - s), gh = (best.rows + 1.9) * pt - (pt - s);
+      var ox = Math.max(0, (W - gw) / 2), oy = Math.max(0, (H - gh) / 2);
+      for (var i = 0; i < N; i++) {
+        var st = cells[i].style;
+        st.left = (ox + (i % best.cols) * pt).toFixed(1) + 'px'; st.top = (oy + 1.9 * pt + Math.floor(i / best.cols) * pt).toFixed(1) + 'px';
+        st.width = st.height = s.toFixed(1) + 'px';
+      }
+      pins.forEach(function (p, j) { p.cell = { x: ox + j * pt, y: oy, w: s, h: s }; });
+      var hits = pins.filter(function (p) { return p.hit > -1; }).sort(function (a, b) { return a.hit - b.hit; });
+      var m = hits.length, compact = W < 560;
+      field.classList.toggle('compact', compact);
+      if (!compact) {
+        var c2 = Math.min(3, m), gap = 16, cw = Math.min(270, (W - gap * (c2 - 1)) / c2), ch = Math.min(158, Math.max(118, cw * .58));
+        var r2 = Math.ceil(m / c2), tw = c2 * cw + (c2 - 1) * gap, th = r2 * ch + (r2 - 1) * gap, x0 = (W - tw) / 2, y0 = Math.max(0, (H - th) / 2);
+        hits.forEach(function (p, j) { p.card = { x: x0 + (j % c2) * (cw + gap), y: y0 + Math.floor(j / c2) * (ch + gap), w: cw, h: ch }; });
+      } else {
+        var g2 = 8, chm = Math.min(76, (H - g2 * (m - 1)) / m), thm = m * chm + (m - 1) * g2, y1 = Math.max(0, (H - thm) / 2);
+        hits.forEach(function (p, j) { p.card = { x: 0, y: y1 + j * (chm + g2), w: W, h: chm }; });
+      }
+      update(last, true);
+      return true;
+    }
+    function update(sp, force) {
+      last = sp;
+      var kk = sp < .22 ? 0 : sp < .45 ? 1 : sp < .68 ? 2 : 3;
+      if (kk !== k) { k = kk; cap.innerHTML = capHTML(k); root.setAttribute('data-step', String(k)); }
+      var t2 = ease(clamp((sp - .2) / .07)), t3 = ease(clamp((sp - .43) / .07));
+      bg.style.opacity = (1 - .6 * t2 - .18 * ease(clamp((sp - .66) / .2))).toFixed(3);
+      var allIn = ease(clamp((sp - .66 - Math.max(0, d.hit.length - 1) * .012) / .14)) > .97;
+      pins.forEach(function (p) {
+        if (!p.cell) return;
+        var t4 = ease(clamp((sp - .66 - Math.max(0, p.hit) * .012) / .14));
+        var base = mixA(C_DARK, C_BLUE, t2), c;
+        if (p.closed) c = rgb(mixA(base, C_GRAY, t3));
+        else if (p.hit < 0) c = rgb(mixA(base, C_PALE, ease(clamp((sp - .66) / .2))));
+        else c = rgb(base);
+        var r = p.cell, x = r.x, y = r.y, w = r.w, hh = r.h, rad = 2;
+        if (p.hit > -1 && p.card) { var q = p.card; x = lerp(r.x, q.x, t4); y = lerp(r.y, q.y, t4); w = lerp(r.w, q.w, t4); hh = lerp(r.h, q.h, t4); rad = lerp(2, 10, t4); }
+        var css = 'left:' + x.toFixed(1) + 'px;top:' + y.toFixed(1) + 'px;width:' + w.toFixed(1) + 'px;height:' + hh.toFixed(1) + 'px;border-radius:' + rad.toFixed(1) + 'px;background:' + c + ';--d:' + p.d;
+        if (force || p.css !== css) { p.el.style.cssText = css; p.css = css; }
+        var show = p.hit > -1 && allIn;
+        if (show !== p.shown) { p.shown = show; p.el.classList.toggle('show', show); p.el.tabIndex = show ? 0 : -1; if (show) p.el.removeAttribute('aria-hidden'); else p.el.setAttribute('aria-hidden', 'true'); }
+      });
+    }
+    return { layout: layout, update: update, field: field };
+  }
+  function initScene() {
+    var sc = $('#scene'); if (!sc) return;
+    if (RM) {
+      sc.classList.add('static');
+      var tpl = $('#stage'); tpl.remove();
+      [0.1, 0.33, 0.56, 1].forEach(function (v) {
+        var dv = document.createElement('div'); dv.className = 'stage'; dv.innerHTML = '<div class="wrap stage-in"><div class="cap"></div><div class="field"></div></div>';
+        sc.appendChild(dv); var S0 = Stage(dv); S0.update(v); S0.layout();
+      });
+      window.__sceneLayout = function () { };
+      return;
+    }
+    var stage = $('#stage'), S = Stage(stage);
+    var p = 0, sp = 0, raf = 0, vis = false, started = false;
+    function prog() { var r = sc.getBoundingClientRect(), dd = sc.offsetHeight - window.innerHeight; return dd > 0 ? clamp(-r.top / dd) : 0; }
+    function loop() {
+      raf = 0; p = prog(); sp += (p - sp) * 0.16; if (Math.abs(p - sp) < 0.0005) sp = p;
+      S.update(sp);
+      if (vis && sp !== p) raf = requestAnimationFrame(loop);
+    }
+    function kick() { if (!raf && vis) raf = requestAnimationFrame(loop); }
+    window.addEventListener('scroll', kick, { passive: true });
+    window.addEventListener('resize', function () { S.layout(); kick(); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
+      vis = es[0].isIntersecting;
+      if (vis && !started) { started = true; S.field.classList.add('go'); }
+      kick();
+    }).observe(sc); else vis = true;
+    window.__sceneLayout = function () { S.layout(); p = sp = prog(); S.update(sp, true); };
+    window.__scene = { prog: function () { return sp; } };
+    sp = p = prog(); S.layout(); S.update(sp, true);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { S.layout(); });
+  }
+
   buildMenus();
   buildHome();
+  initRoll();
+  initScene();
   window.addEventListener('hashchange', route);
   route();
 })();

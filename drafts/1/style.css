@@ -69,6 +69,38 @@ button,select,input{font:inherit;color:inherit}
 .live-n{font-family:var(--disp);font-weight:600;font-size:40px;line-height:1;color:var(--acc);font-variant-numeric:tabular-nums}
 .live-n span{display:inline-block;min-width:1.2ch;text-align:right}
 
+/* 등고선 지도(첫 화면 오른쪽) */
+.hero-in{z-index:1}
+.topo{position:absolute;z-index:0;top:0;bottom:0;right:0;width:60%;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.28) 0,rgba(0,0,0,.28) var(--sh1,32%),#000 var(--sh2,48%));mask-image:linear-gradient(90deg,rgba(0,0,0,.28) 0,rgba(0,0,0,.28) var(--sh1,32%),#000 var(--sh2,48%))}
+.topo .lv{transition:opacity .6s ease}
+.topo.picked .lv{opacity:.2}
+.topo svg{display:block;width:100%;height:100%}
+#cam{transform-box:view-box;transform-origin:0 0}
+.topo path{fill:none;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.topo .lv path{stroke:#fff;stroke-width:.8px}
+.topo .lv path.b{stroke-width:1.5px}
+.topo .bd path{stroke:#fff;stroke-width:.6px;opacity:.13}
+.topo .hl path{stroke:var(--acc);stroke-width:.8px}
+.topo .hl path.b{stroke-width:1.5px}
+.topo .sel{stroke:var(--acc);stroke-width:1.6px}
+.lead{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible;visibility:hidden}
+.lead.on{visibility:visible}
+.lead path{fill:none;stroke:var(--acc);stroke-width:1px;stroke-dasharray:1 2;stroke-dashoffset:0}
+.lead circle{fill:var(--acc)}
+.tag{position:absolute;z-index:2;top:0;left:0;right:auto;margin:0;padding:3px 10px;background:var(--navy);border:1px solid var(--acc);color:var(--acc);font-size:15px;font-weight:500;line-height:1.5;white-space:nowrap;visibility:hidden;max-width:calc(100% - 40px);overflow:hidden;text-overflow:ellipsis}
+.tag.on{visibility:visible}
+.tag b{font-weight:700}
+/* 숫자 자릿수 굴림 */
+.live{align-items:center}
+.live-n{display:inline-flex;align-items:flex-start;line-height:1.1}
+.roll{display:inline-flex}
+.anim .live-n{opacity:0}
+.anim .live-n.is-ready,.safe .live-n{opacity:1}
+.roll .dg{display:inline-block;height:1.1em;overflow:hidden}
+.roll .st{display:block;transition:transform .75s cubic-bezier(.2,.75,.15,1)}
+.roll .st i{display:block;height:1.1em;line-height:1.1em;font-style:normal;text-align:center}
+.ft-src{margin:6px 0 0;font-size:13px;color:#6b7280}
+
 /* 문장형 선택 상자 */
 .pick{margin-top:40px;background:#fff;color:var(--navy);border-radius:20px;padding:24px 40px;display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.2fr) minmax(0,1.1fr) auto;align-items:center;min-height:128px}
 .pk{position:relative;display:block;padding:0 28px;border-left:2px solid var(--navy);min-width:0;cursor:pointer}
@@ -252,7 +284,6 @@ button,select,input{font:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 /* 폭별 */
-@media (min-width:1200px){.hero-lines{display:block}}
 @media (max-width:1279px){
   .pk-v{font-size:22px}
   .sup-in{grid-template-columns:340px minmax(0,1fr);gap:44px}
@@ -260,6 +291,10 @@ button,select,input{font:inherit;color:inherit}
   .links{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-width:1023px){
+  .topo{position:relative;top:auto;bottom:auto;right:auto;width:100%;height:270px;-webkit-mask-image:none;mask-image:none}
+  .hero-in{padding-top:18px}
+  .hero.compact .topo{height:150px}
+  .hero.compact .hero-in{padding-top:14px}
   .gnb{display:none}
   .burger{display:block}
   .hd-in{height:84px}
@@ -280,10 +315,13 @@ button,select,input{font:inherit;color:inherit}
 }
 @media (max-width:767px){
   body{font-size:16px}
+  .topo{height:210px}
+  .hero.compact .topo{height:140px}
+  .tag{font-size:13px;padding:2px 8px}
   .mast{font-size:13px}
   .hd-in{height:76px}
   .logo img{height:34px}
-  .hero-in{padding:58px 0 40px}
+  .hero-in{padding:10px 0 40px}
   .hero-t{line-height:1.12}
   .hero-row{margin-top:10px;flex-direction:column;align-items:flex-start;gap:14px}
   .tab{font-size:20px;line-height:32px;padding:4px 0 5px}
@@ -323,7 +361,7 @@ button,select,input{font:inherit;color:inherit}
   .cta-t{font-size:26px}
   .cta-p{font-size:16px}
   .ft-t{font-size:22px}
-  .hero.compact .hero-in{padding:36px 0 40px}
+  .hero.compact .hero-in{padding:8px 0 40px}
   .nrow{grid-template-columns:1fr;gap:8px;padding:22px 0}
   .nrow-go{grid-column:auto}
   .nrow-t{font-size:19px}

@@ -6,7 +6,10 @@
 <title>강원테크노파크 — 우리 회사가 지금 받을 수 있는 지원</title>
 <meta name="description" content="회사 위치·분야·필요한 도움을 고르면 지금 신청할 수 있는 강원테크노파크 공고만 마감 순으로 보여 드립니다.">
 <link rel="icon" href="../assets-shared/img/favicon.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fastly.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"></noscript>
 <link rel="stylesheet" href="style.css">
 <script>
   (function () {
@@ -62,7 +65,9 @@
 <main id="main">
   <!-- 첫 화면 -->
   <section class="hero" id="hero">
-    <div class="hero-lines" aria-hidden="true"></div>
+    <div class="topo" id="topo" aria-hidden="true"></div>
+    <svg class="lead" id="lead" aria-hidden="true"><path pathLength="1" d=""/><circle r="3.5" cx="-20" cy="-20"/></svg>
+    <p class="tag" id="tag" aria-live="polite"></p>
     <div class="wrap hero-in">
       <h1 class="hero-t"><span class="ln"><span>우리 회사가 지금</span></span><span class="ln"><span>받을 수 있는 지원.</span></span></h1>
       <div class="hero-row">
@@ -70,7 +75,7 @@
           <a class="tab on" href="#/" role="tab" aria-selected="true">지원 공고 찾기</a>
           <a class="tab" href="#/space" role="tab" aria-selected="false">입주 공간 찾기</a>
         </div>
-        <a class="live" href="#/notices"><span class="live-l">지금 신청할 수 있는 공고</span><b class="live-n"><span data-count id="liveN">12</span>건</b></a>
+        <a class="live" href="#/notices"><span class="live-l">지금 신청할 수 있는 공고</span><b class="live-n"><span class="roll" id="liveN">12</span><span>건</span></b></a>
       </div>
       <form class="pick" id="pick" autocomplete="off">
         <label class="pk">
@@ -173,6 +178,7 @@
       <a href="https://www.gwtp.or.kr/gwtp/pageview.php?url=sub07g&amp;keyvalue=sub07" target="_blank" rel="noopener">찾아오시는 길</a>
     </div>
     <p class="ft-addr" id="ftAddr">(24206) 강원특별자치도 춘천시 신북읍 신북로 61-10 강원테크노파크 기술혁신지원센터 · 대표전화 033-248-5600</p>
+    <p class="ft-src">지형: AWS Terrain Tiles(SRTM 등 공개 고도 자료), 시군 경계: 통계청</p>
     <p class="ft-c">© 재단법인 강원테크노파크</p>
   </div>
 </footer>
@@ -181,9 +187,11 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="../assets-shared/gw-map.js"></script>
+<script src="../assets-shared/gw-topo.js"></script>
 <script src="../assets-shared/base.js"></script>
 <script src="../assets-shared/notices.js"></script>
 <script src="../assets-shared/gw-core.js"></script>
+<script src="hero-map.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

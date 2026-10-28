@@ -27,8 +27,8 @@
       t.textContent = v ? PH[k](v) : t.getAttribute('data-ph');
       lab.classList.toggle('set', !!v);
     });
-    var on = form.elements.r.value;
-    $$('.hero-lines path').forEach(function (p) { p.classList.toggle('on', p.getAttribute('data-city') === on); });
+    if (window.HeroMap && mapReady) HeroMap.pick(form.elements.r.value);
+    updateLive();
   }
   form.addEventListener('change', syncPick);
   function queryHash() {
@@ -65,8 +65,18 @@
     setTimeout(function () { el.textContent = n; }, 1200);
   }
 
-  /* ── 첫 화면 지도 선 ── */
-  $('.hero-lines').innerHTML = G.mapSvg({});
+  /* ── 첫 화면 등고선 지도 + 숫자 굴림 ── */
+  var mapReady = false, liveShown = false;
+  function curCount() {
+    var f = form.elements, any = f.r.value || f.s.value || f.t.value;
+    return { any: !!any, n: any ? G.find({ r: f.r.value, s: f.s.value, t: f.t.value ? [f.t.value] : [] }).hit.length : liveN };
+  }
+  function updateLive() {
+    if (!liveShown || !window.HeroMap) return;
+    var c = curCount();
+    $('.live-l').textContent = c.any ? '고른 조건으로 지금 신청할 공고' : '지금 신청할 수 있는 공고';
+    HeroMap.roll($('#liveN'), c.n);
+  }
 
   /* ── 지원 묶음 ── */
   var byCity = G.placesByCity();
@@ -271,11 +281,19 @@
       if (p === '/space') { var sp = $('#space'); setTimeout(function () { sp.scrollIntoView({ behavior: reduce || first ? 'auto' : 'smooth' }); }, 30); }
     }
     if (!first && p !== '/space') window.scrollTo(0, 0);
+    if (window.HeroMap && mapReady && !hero.hidden) setTimeout(HeroMap.layout, 0);
     document.title = p === '/' ? '강원테크노파크 — 우리 회사가 지금 받을 수 있는 지원' : (document.querySelector('#view h1, .hero-t') || {}).textContent + ' — 강원테크노파크';
     first = false;
   }
   window.addEventListener('hashchange', route);
   syncPick();
   route();
-  countUp($('#liveN'), liveN);
+  if (window.HeroMap && window.GW_TOPO) {
+    HeroMap.roll($('#liveN'), String(liveN).replace(/./g, '0'));
+    $('.live-n').classList.add('is-ready');
+    HeroMap.init({ hero: hero, form: form, box: $('#topo'), tag: $('#tag'), lead: $('#lead') }).then(function () {
+      mapReady = true; liveShown = true; updateLive();
+      if (form.elements.r.value) HeroMap.pick(form.elements.r.value);
+    });
+  }
 })();
