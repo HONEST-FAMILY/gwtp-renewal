@@ -389,8 +389,11 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 @media (max-width: 1180px) {
   .gnb { gap: 22px; }
   .gnb a { font-size: 16px; }
-  .hero-title { width: 54%; }
-  .hero-panel { left: auto; right: 40px; width: 46%; }
+  .hero-band { height: 420px; }
+  .hero-row { position: static; }
+  .hero-row .wrap { height: auto; padding: 0; }
+  .hero-title { position: relative; left: auto; top: auto; width: 100%; padding: 44px 40px 36px; }
+  .hero-panel { position: relative; left: auto; right: auto; top: auto; width: 100%; padding: 36px 40px 40px 46px; }
   .home-notices { grid-template-columns: 1fr; }
   .side-card { position: static; }
   .sys-sec .sys-grid { grid-template-columns: repeat(3, 1fr); }
